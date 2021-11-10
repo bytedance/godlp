@@ -1,0 +1,16 @@
+.DS_Store
+coverage.html
+output/
+*.pyc
+venv/
+.idea
+*.vscode
+debug.test
+go.sum
+logger/*.log
+logger/*.log.*
+*.log
+*.log.*
+builtin_detector_rules.json
+bench/
+*.test
