@@ -513,14 +513,16 @@ func (I *Detector) verifyByContext(inputBytes []byte, res *dlpheader.DetectResul
 	subInput = bytes.ToLower(subInput)
 	found := false
 	for _, word := range I.CDict {
+		if len(word) == 0 {
+			continue
+		}
 		wordBytes := []byte(strings.ToLower(word))
 		pos := bytes.Index(subInput, wordBytes)
 		for start := 0; pos != -1; pos = bytes.Index(subInput[start:], wordBytes) {
 			if I.isWholeWord(subInput[start:], wordBytes, pos) {
-				found = true
-				break
+				return true
 			}
-			start = pos + len(word)
+			start += pos + len(word)
 		}
 	}
 	if !found {
