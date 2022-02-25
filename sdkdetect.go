@@ -309,12 +309,12 @@ func (a ResultList) Less(i, j int) bool {
 
 // Contain checks whether a[i] contains a[j]
 func (a ResultList) Contain(i, j int) bool {
-	return a[i].ByteStart <= a[j].ByteStart && a[j].ByteEnd <= a[i].ByteEnd
+	return a[i].Key == a[j].Key && a[i].ByteStart <= a[j].ByteStart && a[j].ByteEnd <= a[i].ByteEnd
 }
 
 // Equal checks whether positions are equal
 func (a ResultList) Equal(i, j int) bool {
-	return a[i].ByteStart == a[j].ByteStart && a[j].ByteEnd == a[i].ByteEnd
+	return a[i].ByteStart == a[j].ByteStart && a[j].ByteEnd == a[i].ByteEnd && a[i].Key == a[j].Key
 }
 
 // merge and sort two detect results
