@@ -28,31 +28,31 @@ type DetectResult struct {
 }
 
 var (
-	ExampleCHAR     = "ExampleCHAR"
-	ExampleTAG      = "ExampleTAG"
-	ExampleREPLACE  = "ExampleREPLACE"
-	ExampleEMPTY    = "ExampleEMPTY"
-	ExampleBASE64   = "ExampleBASE64"
-	NULL       = "NULL"
-	CHINAPHONE = "CHINAPHONE"
-	PHONE      = "PHONE"
-	CHINAID    = "CHINAID"
-	IDCARD     = "IDCARD"
-	Email      = "Email"
-	UID        = "UID"
-	BANK       = "BANK"
-	PASSPORT   = "PASSPORT"
-	ADDRESS    = "ADDRESS"
-	NAME       = "NAME"
-	NUMBER     = "NUMBER"
-	MACADDR    = "MACADDR"
-	ABA        = "ABA"
-	BITCOIN    = "BITCOIN"
-	CAR        = "CAR"
-	DID        = "DID"
-	BIRTH      = "BIRTH"
-	AGE        = "AGE"
-	EDU        = "EDU"
+	ExampleCHAR    = "ExampleCHAR"
+	ExampleTAG     = "ExampleTAG"
+	ExampleREPLACE = "ExampleREPLACE"
+	ExampleEMPTY   = "ExampleEMPTY"
+	ExampleBASE64  = "ExampleBASE64"
+	NULL           = "NULL"
+	CHINAPHONE     = "CHINAPHONE"
+	PHONE          = "PHONE"
+	CHINAID        = "CHINAID"
+	IDCARD         = "IDCARD"
+	Email          = "Email"
+	UID            = "UID"
+	BANK           = "BANK"
+	PASSPORT       = "PASSPORT"
+	ADDRESS        = "ADDRESS"
+	NAME           = "NAME"
+	NUMBER         = "NUMBER"
+	MACADDR        = "MACADDR"
+	ABA            = "ABA"
+	BITCOIN        = "BITCOIN"
+	CAR            = "CAR"
+	DID            = "DID"
+	BIRTH          = "BIRTH"
+	AGE            = "AGE"
+	EDU            = "EDU"
 )
 
 type Processor func(rawLog string, kvs ...interface{}) (string, []interface{}, bool)
@@ -78,6 +78,11 @@ type EngineAPI interface {
 	// DetectJSON detects json string
 	// 对json string 进行敏感信息识别
 	DetectJSON(jsonText string) ([]*DetectResult, error)
+
+	// DeidentifyJSONFromDetectResults  returns masked json object in string format from the passed-in []*DetectResult.
+	// You may want to call DetectJSON first to obtain the []*DetectResult.
+	// 根据传入的 []*DetectResult 对 Json 进行打码，返回打码后的JSON string
+	DeidentifyJSONByResult(jsonText string, detectResults []*DetectResult) (outStr string, retErr error)
 
 	// Deidentify detects string firstly, then return masked string and results
 	// 对string先识别，然后按规则进行打码

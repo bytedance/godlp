@@ -4,6 +4,7 @@ package dlp
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/bytedance/godlp/dlpheader"
 	"github.com/bytedance/godlp/errlist"
 )
@@ -47,7 +48,7 @@ func (I *Engine) DeidentifyMap(inputMap map[string]string) (outMap map[string]st
 	return
 }
 
-// DeidentifyJSON detects JSON firstly, then return masked json object in string formate and results
+// DeidentifyJSON detects JSON firstly, then return masked json object in string format and results
 // 对jsonText先识别，然后按规则进行打码，返回打码后的JSON string
 func (I *Engine) DeidentifyJSON(jsonText string) (outStr string, retResults []*dlpheader.DetectResult, retErr error) {
 	defer I.recoveryImpl()
@@ -76,6 +77,35 @@ func (I *Engine) DeidentifyJSON(jsonText string) (outStr string, retResults []*d
 	} else {
 		retErr = err
 	}
+	return
+}
+
+// DeidentifyJSONByResult  returns masked json object in string format from the passed-in []*dlpheader.DetectResult.
+// You may want to call DetectJSON first to obtain the []*dlpheader.DetectResult.
+// 根据传入的 []*dlpheader.DetectResult 对 Json 进行打码，返回打码后的JSON string
+func (I *Engine) DeidentifyJSONByResult(jsonText string, detectResults []*dlpheader.DetectResult) (outStr string, retErr error) {
+	defer I.recoveryImpl()
+	// have to use closure to pass retResults parameters
+	if !I.hasConfiged() { // not configed
+		panic(errlist.ERR_HAS_NOT_CONFIGED)
+	}
+	if I.hasClosed() {
+		return jsonText, errlist.ERR_PROCESS_AFTER_CLOSE
+	}
+	outStr = jsonText
+	var jsonObj interface{}
+	if err := json.Unmarshal([]byte(jsonText), &jsonObj); err == nil {
+		kvMap := I.resultsToMap(detectResults)
+		outObj := I.dfsJSON("", &jsonObj, kvMap, true)
+		if outJSON, err := json.Marshal(outObj); err == nil {
+			outStr = string(outJSON)
+		} else {
+			retErr = err
+		}
+	} else {
+		retErr = err
+	}
+
 	return
 }
 
