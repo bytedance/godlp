@@ -6,8 +6,10 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/bytedance/godlp/log"
 	"gopkg.in/yaml.v2"
+
+	"github.com/bytedance/godlp/dlpheader"
+	"github.com/bytedance/godlp/log"
 )
 
 type RuleTestItem struct {
@@ -67,6 +69,72 @@ func TestRule(t *testing.T) {
 		}
 	} else {
 		t.Error(err)
+	}
+}
+
+func TestDeidentifyJSONByResult(t *testing.T) {
+	jsonBody := `
+				{
+					"name": "abcdefg",
+					"uid": "1234567890"
+				}
+				`
+	eng, err := NewEngine("replace.your.psm")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = eng.ApplyConfigDefault()
+	if err != nil {
+		t.Error(err)
+	}
+
+	// detectRes contains NAME and UID
+	detectRes, err := eng.DetectJSON(jsonBody)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// deidentify the original text
+	out, err := eng.DeidentifyJSONByResult(jsonBody, detectRes)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if out != "{\"name\":\"abc****\",\"uid\":\"1*********\"}" {
+		t.Error("incorrect output")
+	}
+
+	// remove the rule NAME from the detectResults
+	for _, r := range detectRes {
+		newDetectRes := make([]*dlpheader.DetectResult, 0)
+		if r.InfoType != "NAME" {
+			newDetectRes = append(newDetectRes, r)
+		}
+
+		detectRes = newDetectRes
+	}
+
+	// apply the new rule on the original text
+	out, err = eng.DeidentifyJSONByResult(jsonBody, detectRes)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// the removed rule should be ignored
+	if out != "{\"name\":\"abcdefg\",\"uid\":\"1*********\"}" {
+		t.Error("incorrect output")
+	}
+
+	// apply the rule UID on a JSON text which doesn't have an UID
+	jsonBody = "{\"name\":\"abcdefg\"}"
+	out, err = eng.DeidentifyJSONByResult(jsonBody, detectRes)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if out != jsonBody {
+		t.Error("incorrect output")
 	}
 }
 

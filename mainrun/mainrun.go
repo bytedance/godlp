@@ -3,9 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"strings"
+
 	dlp "github.com/bytedance/godlp"
 	"github.com/bytedance/godlp/dlpheader"
-	"strings"
 )
 
 func dupString(src string, coefficient int) string {
@@ -64,6 +65,13 @@ mac地址 06-06-06-aa-bb-cc
 		if results, err := eng.DetectJSON(inJSON); err == nil {
 			fmt.Printf("\t6. DetectJSON( inJSON: %s )\n", inJSON)
 			eng.ShowResults(results)
+
+			if outJSON, err := eng.DeidentifyJSONByResult(inJSON, results); err == nil {
+				fmt.Printf("\t7. DeidentifyJSONByResult( inJSON: %s , results: %v )\n", inJSON, results)
+				fmt.Printf("\toutJSON: %s\n", outJSON)
+				eng.ShowResults(results)
+				fmt.Println()
+			}
 		}
 
 		if outJSON, results, err := eng.DeidentifyJSON(inJSON); err == nil {
