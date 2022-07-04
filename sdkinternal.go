@@ -4,13 +4,14 @@ package dlp
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"runtime/debug"
+	"strings"
+
 	"github.com/bytedance/godlp/detector"
 	"github.com/bytedance/godlp/errlist"
 	"github.com/bytedance/godlp/log"
 	"github.com/bytedance/godlp/mask"
-	"os"
-	"runtime/debug"
-	"strings"
 )
 
 type HttpResponseBase struct {
@@ -21,7 +22,7 @@ type HttpResponseBase struct {
 type DescribeRulesResponse struct {
 	HttpResponseBase
 	Rule []byte `json:"rule,omitempty"`
-	Crc  uint32 `json:"crc,omitempty"` //rule 的crc
+	Crc  uint32 `json:"crc,omitempty"` // rule 的crc
 }
 
 // private func
@@ -104,10 +105,10 @@ func (I *Engine) isDebugMode() bool {
 // in release mode, log level is ERROR and log message will be printed into stderr
 func (I *Engine) initLogger() error {
 	if I.isDebugMode() {
-		//log.SetLevel(0)
+		// log.SetLevel(0)
 		log.Debugf("DLP@%s run in debug mode", I.Version)
 	} else { // release mode
-		//log.SetLevel(log.LevelError)
+		// log.SetLevel(log.LevelError)
 	}
 	return nil
 }
@@ -186,6 +187,28 @@ func (I *Engine) dfsJSON(path string, ptr *interface{}, kvMap map[string]string,
 					return val
 				}
 			}
+		}
+	case float64:
+		// float64 don't need to mask
+		if val, ok := (*ptr).(float64); ok {
+			if isDeidentify {
+				if mask, ok := kvMap[path]; ok {
+					return mask
+				} else {
+					return val
+				}
+			}
+			kvMap[path] = fmt.Sprintf("%0.f", val)
+			return val
+		}
+	case bool:
+		// bool don't need to mask
+		if val, ok := (*ptr).(bool); ok {
+			kvMap[path] = fmt.Sprint(val)
+		}
+	case nil:
+		if path != "" {
+			kvMap[path] = fmt.Sprint(nil)
 		}
 	}
 	return *ptr
