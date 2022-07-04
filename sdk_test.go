@@ -138,6 +138,43 @@ func TestDeidentifyJSONByResult(t *testing.T) {
 	}
 }
 
+func TestEngine_DetectJSON(t *testing.T) {
+	jsonTestCases := []struct {
+		in  string
+		out string
+	}{
+		{
+			in:  `{"phone":13312341234}`,
+			out: `{"phone":"13*******34"}`,
+		},
+		{
+			in:  `{"uid":1234567890}`,
+			out: `{"uid":"1*********"}`,
+		},
+	}
+	eng, err := NewEngine("replace.your.psm")
+	if err != nil {
+		t.Error(err)
+	}
+	err = eng.ApplyConfigDefault()
+	if err != nil {
+		t.Error(err)
+	}
+	for _, tc := range jsonTestCases {
+		detectRes, err := eng.DetectJSON(tc.in)
+		if err != nil {
+			t.Error(err)
+		}
+		out, err := eng.DeidentifyJSONByResult(tc.in, detectRes)
+		if err != nil {
+			t.Error(err)
+		}
+		if out != tc.out {
+			t.Errorf("incorrect output, expect: %s, actual: %s", tc.out, out)
+		}
+	}
+}
+
 // private func
 
 func setup() {
