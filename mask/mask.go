@@ -4,7 +4,6 @@ package mask
 import (
 	"crypto/md5"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"hash/crc32"
 	"strings"
@@ -213,7 +212,7 @@ func (I *MaskWorker) maskAlgoImpl(in string) (string, error) {
 	case "BASE64":
 		return base64.StdEncoding.EncodeToString(inBytes), nil
 	case "MD5":
-		return hex.EncodeToString(md5.New().Sum(inBytes)), nil
+		return fmt.Sprintf("%x", md5.Sum(inBytes)), nil
 	case "CRC32":
 		return fmt.Sprintf("%08x", crc32.ChecksumIEEE(inBytes)), nil
 	case "ADDRESS":

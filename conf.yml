@@ -37,6 +37,9 @@ MaskRules:
   - RuleName: ExampleBASE64
     MaskType: ALGO
     Value: "BASE64" # one of [BASE64, MD5, CRC32, ADDRESS, NUMBER, DEIDENTIFY]
+  - RuleName: ExampleMD5
+    MaskType: ALGO
+    Value: "MD5" # one of [BASE64, MD5, CRC32, ADDRESS, NUMBER, DEIDENTIFY]
   - RuleName: DEIDENTIFY
     MaskType: ALGO
     Value: "DEIDENTIFY"
@@ -377,7 +380,7 @@ Rules:
         - \b[13][a-km-zA-HJ-NP-Z1-9]{26,33}\b
     Verify:
       VAlgo: [BITCOIN]
-    Mask: BITCOIN
+    Mask: ExampleMD5
     ExtInfo:
       EnGroup: user_data
       CnGroup: 用户数据
