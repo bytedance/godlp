@@ -165,7 +165,7 @@ func (I *Engine) dfsJSON(path string, ptr *interface{}, kvMap map[string]string,
 		if val, ok := (*ptr).(string); ok {
 			// try nested json Unmarshal
 			if I.maybeJSON(val) {
-				if err := json.Unmarshal([]byte(val), &subObj); err == nil {
+				if err := decodeJson([]byte(val), &subObj); err == nil {
 					obj := I.dfsJSON(path, &subObj, kvMap, isDeidentify)
 					if ret, err := json.Marshal(obj); err == nil {
 						retStr := string(ret)
