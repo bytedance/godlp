@@ -433,7 +433,7 @@ func max(x, y int) int {
 // detectJSONImpl implements detectJSON
 func (I *Engine) detectJSONImpl(jsonText string) (retResults []*dlpheader.DetectResult, kvMap map[string]string, retErr error) {
 	var jsonObj interface{}
-	if err := json.Unmarshal([]byte(jsonText), &jsonObj); err == nil {
+	if err := decodeJson([]byte(jsonText), &jsonObj); err == nil {
 		//fmt.Printf("%+v\n", jsonObj)
 		kvMap = make(map[string]string, 0)
 		I.dfsJSON("", &jsonObj, kvMap, false)

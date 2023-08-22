@@ -2,6 +2,7 @@
 package dlp
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -63,7 +64,7 @@ func (I *Engine) DeidentifyJSON(jsonText string) (outStr string, retResults []*d
 	if results, kvMap, err := I.detectJSONImpl(jsonText); err == nil {
 		retResults = results
 		var jsonObj interface{}
-		if err := json.Unmarshal([]byte(jsonText), &jsonObj); err == nil {
+		if err := decodeJson([]byte(jsonText), &jsonObj); err == nil {
 			//kvMap := I.resultsToMap(results)
 			outObj := I.dfsJSON("", &jsonObj, kvMap, true)
 			if outJSON, err := json.Marshal(outObj); err == nil {
@@ -94,7 +95,7 @@ func (I *Engine) DeidentifyJSONByResult(jsonText string, detectResults []*dlphea
 	}
 	outStr = jsonText
 	var jsonObj interface{}
-	if err := json.Unmarshal([]byte(jsonText), &jsonObj); err == nil {
+	if err := decodeJson([]byte(jsonText), &jsonObj); err == nil {
 		kvMap := I.resultsToMap(detectResults)
 		outObj := I.dfsJSON("", &jsonObj, kvMap, true)
 		if outJSON, err := json.Marshal(outObj); err == nil {
@@ -176,4 +177,11 @@ func (I *Engine) resultsToMap(results []*dlpheader.DetectResult) map[string]stri
 		kvMap[item.Key] = item.MaskText
 	}
 	return kvMap
+}
+
+// decodeJson 应对精度丢失问题，json.Unmarshal到interface{}时，数字会被默认序列化为float64导致精度丢失
+func decodeJson(data []byte, v interface{}) error {
+	d := json.NewDecoder(bytes.NewReader(data))
+	d.UseNumber()
+	return d.Decode(v)
 }
